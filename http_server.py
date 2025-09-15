@@ -1,5 +1,7 @@
 import socket
 from utility import parse_http_request
+from routes import ROUTES
+from request import Request
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -49,26 +51,28 @@ while True:
 
                 # Send response back to client
                 try:
-                    print("Sending message...")
-                    msg = "Hello, client!"
-                    msg_len = len(msg)
-                    http_response = f"HTTP/1.1 200 OK\r\n" \
-                        "Content-Type: text/plain\r\n" \
-                        f"Content-Length: {str(msg_len)}\r\n" \
-                        "Connection: close\r\n\r\n" \
-                        f"{msg}"
+                    handler = ROUTES.get((method, path))
+                    request = Request(method, path, headers, body)
+                    response = None
 
-                    total_bytes_sent = 0
-                    while total_bytes_sent < len(http_response):
-                        bytes_sent = client_socket.send(http_response.encode('utf-8'))
-                        print(f"Sent {bytes_sent} bytes")
-                        total_bytes_sent += bytes_sent
+                    if handler:
+                        response = handler(request)
+                    else:
+                        response = (
+                            "HTTP/1.1 404 Not Found\r\n"
+                            "Content-Length: 9\r\n"
+                            "Content-Type: text/plain\r\n"
+                            "\r\n"
+                            "Not Found"
+                        ).encode("utf-8")
+
+                    client_socket.sendall(response)
 
                 except Exception as e:
                     print(f"Error sending response: {e}")
                     
                 finally:
-                    print("Finished sending response, closing client socket.")
+                    print("Closing client socket.")
                     client_socket.close()
                     break
 
@@ -78,3 +82,19 @@ while True:
 
 print("Closing server socket")
 server_socket.close()
+
+
+                    # print("Sending response...")
+                    # msg = "Hello, client!"
+                    # msg_len = len(msg)
+                    # http_response = f"HTTP/1.1 200 OK\r\n" \
+                    #     "Content-Type: text/plain\r\n" \
+                    #     f"Content-Length: {str(msg_len)}\r\n" \
+                    #     "Connection: close\r\n\r\n" \
+                    #     f"{msg}"
+
+                    # total_bytes_sent = 0
+                    # while total_bytes_sent < len(http_response):
+                    #     bytes_sent = client_socket.send(http_response.encode('utf-8'))
+                    #     print(f"Sent {bytes_sent} bytes")
+                    #     total_bytes_sent += bytes_sent
