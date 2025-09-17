@@ -2,23 +2,10 @@ import socket
 from utility import parse_http_request
 from routes import ROUTES
 from request import Request
+import threading
 
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-host = 'localhost'
-port = 8000
-
-server_socket.bind((host, port))
-server_socket.listen(5)
-
-while True:
-    print("Server listening on localhost port 8000")
-
-    # Wait for client to connect to socket
-    try:
-        client_socket, address = server_socket.accept()
-        print("Opened client socket")
-
+def handle_client(client_socket, address):
+    with client_socket:
         # Receive all data from client, store in buffer
         buffer = ""
         while True:
@@ -70,19 +57,37 @@ while True:
 
                 except Exception as e:
                     print(f"Error sending response: {e}")
-                    
+                
                 finally:
-                    print("Closing client socket.")
-                    client_socket.close()
+                    print("Finished handling client.")
                     break
 
-    except OSError as e:
-        print(f"Client socket error: {e}")
-        break
 
-print("Closing server socket")
-server_socket.close()
+def run_server():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
+        host = 'localhost'
+        port = 8000
 
+        server_socket.bind((host, port))
+        server_socket.listen(5)
+
+        while True:
+            print("Server listening on localhost port 8000")
+            # Wait for client to connect to socket
+            try:
+                client_socket, address = server_socket.accept()
+                print("Opened client socket")
+                # Spawn a new thread for each client
+                thread = threading.Thread(target=handle_client, args=(client_socket, address))
+                thread.daemon = True  # optional: don’t block exit
+                thread.start()
+
+            except OSError as e:
+                print(f"Client socket error: {e}")
+                break
+
+if __name__ == "__main__":
+    run_server()
 
                     # print("Sending response...")
                     # msg = "Hello, client!"
