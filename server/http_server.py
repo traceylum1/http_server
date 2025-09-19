@@ -88,18 +88,3 @@ def run_server():
 
 if __name__ == "__main__":
     run_server()
-
-                    # print("Sending response...")
-                    # msg = "Hello, client!"
-                    # msg_len = len(msg)
-                    # http_response = f"HTTP/1.1 200 OK\r\n" \
-                    #     "Content-Type: text/plain\r\n" \
-                    #     f"Content-Length: {str(msg_len)}\r\n" \
-                    #     "Connection: close\r\n\r\n" \
-                    #     f"{msg}"
-
-                    # total_bytes_sent = 0
-                    # while total_bytes_sent < len(http_response):
-                    #     bytes_sent = client_socket.send(http_response.encode('utf-8'))
-                    #     print(f"Sent {bytes_sent} bytes")
-                    #     total_bytes_sent += bytes_sent
