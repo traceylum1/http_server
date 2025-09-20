@@ -1,6 +1,6 @@
 import socket
 from utility import parse_http_request
-from routes import ROUTES
+from routes import ROUTES, handle_request
 from request import Request
 import threading
 
@@ -38,20 +38,22 @@ def handle_client(client_socket, address):
 
                 # Send response back to client
                 try:
-                    handler = ROUTES.get((method, path))
+                    # handler = ROUTES.get((method, path))
                     request = Request(method, path, headers, body)
-                    response = None
+                    response = handle_request(request)
 
-                    if handler:
-                        response = handler(request)
-                    else:
-                        response = (
-                            "HTTP/1.1 404 Not Found\r\n"
-                            "Content-Length: 9\r\n"
-                            "Content-Type: text/plain\r\n"
-                            "\r\n"
-                            "Not Found"
-                        ).encode("utf-8")
+                    
+
+                    # if handler:
+                    #     response = handler(request)
+                    # else:
+                    #     response = (
+                    #         "HTTP/1.1 404 Not Found\r\n"
+                    #         "Content-Length: 9\r\n"
+                    #         "Content-Type: text/plain\r\n"
+                    #         "\r\n"
+                    #         "Not Found"
+                    #     ).encode("utf-8")
 
                     client_socket.sendall(response)
 

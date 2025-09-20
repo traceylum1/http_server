@@ -7,4 +7,4 @@ def request_builder(method, uri, body=None):
         f"Content-Type: {content_type}\r\n"
         f"Content-Length: {len(body_bytes)}\r\n"
         f"Connection: close \r\n\r\n"
-        ).encode("utf-8") + body_bytes
+    ).encode("utf-8") + body_bytes

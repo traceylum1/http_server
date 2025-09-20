@@ -29,43 +29,57 @@ http_status_codes = {
 }
 
 
-def response_builder(request: Request):
-    method = request.method
-    path = request.path
-    resource, params, query_params = parse_uri(path)
-    
+def build_response(status_code: int, body: str):
+    reason_phrases = {
+        200: "OK",
+        201: "Created",
+        400: "Bad Request",
+        404: "Not Found",
+        405: "Method Not Allowed",
+    }
+    reason = reason_phrases.get(status_code, "Unknown")
+
+    body_bytes = body.encode("utf-8")
     return (
-        "HTTP/1.1 404 Not Found\r\n"
-        "Content-Length: 9\r\n"
+        f"HTTP/1.1 {status_code} {reason}\r\n"
+        f"Content-Length: {len(body_bytes)}\r\n"
         "Content-Type: text/plain\r\n"
         "\r\n"
-        "Not Found"
-    ).encode("utf-8")
+    ).encode("utf-8") + body_bytes
 
+
+def handle_request(request: Request):
+    method = request.method
+    resource, params, query_params = parse_uri(request.path)
+
+    # Decision logic
+    if resource == "" and method == "GET":
+        return handle_root()
+    elif resource == "hello" and method == "GET":
+        return handle_hello()
+    elif resource == "user" and method == "POST":
+        body_data = request.json()
+        return handle_user(body_data)
+    else:
+        return build_response(404, "")
     
 
-def handle_root(request: Request):
+def handle_root():
     print("Calling handle_root...")
-    return "HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\nHello, world!".encode("utf-8")
+    return build_response(200, "Hello, world!")
 
-def handle_hello(request: Request):
+def handle_hello():
     print("Calling handle_hello...")
-    return "HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello there!".encode("utf-8")
+    return build_response(200, "Hello, there!")
 
-def handle_user(request: Request):
+def handle_user(body_data):
     print("Calling handle_user...")
-    body_data = request.json()
     print("body_data", body_data)
     user_id = body_data.get("id") if body_data else None
     user_data = {"id": user_id, "name": "Abe"}
 
-    body_bytes = json.dumps(user_data).encode("utf-8")
-    return (
-        "HTTP/1.1 200 OK\r\n"
-        f"Content-Length: {len(body_bytes)}\r\n"
-        "Content-Type: application/json\r\n"
-        "\r\n"
-    ).encode() + body_bytes
+    body_bytes = json.dumps(user_data)
+    return build_response(200, body_bytes)
 
 ROUTES = {
     ("GET", "/"): handle_root,
