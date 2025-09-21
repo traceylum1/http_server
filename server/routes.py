@@ -1,32 +1,13 @@
 from request import Request
 import json
 from utility import parse_uri
+from queue import Queue
+from threading import Lock
 
-http_status_codes = {
-    # 2xx Success
-    200: "OK",
-    201: "Created",
-    204: "No Content",
-
-    # 3xx Redirection
-    301: "Moved Permanently",
-    302: "Found",
-    304: "Not Modified",
-
-    # 4xx Client Errors
-    400: "Bad Request",
-    401: "Unauthorized",
-    403: "Forbidden",
-    404: "Not Found",
-    405: "Method Not Allowed",
-    429: "Too Many Requests",
-
-    # 5xx Server Errors
-    500: "Internal Server Error",
-    502: "Bad Gateway",
-    503: "Service Unavailable",
-    504: "Gateway Timeout",
-}
+max_size = 100
+job_queue = Queue(max_size)
+results = {}
+queue_lock = Lock()
 
 
 def build_response(status_code: int, body: str):
@@ -39,7 +20,7 @@ def build_response(status_code: int, body: str):
     }
     reason = reason_phrases.get(status_code, "Unknown")
 
-    body_bytes = body.encode("utf-8")
+    body_bytes = json.dumps(body).encode("utf-8")
     return (
         f"HTTP/1.1 {status_code} {reason}\r\n"
         f"Content-Length: {len(body_bytes)}\r\n"
@@ -60,6 +41,11 @@ def handle_request(request: Request):
     elif resource == "user" and method == "POST":
         body_data = request.json()
         return handle_user(body_data)
+    elif resource == "add_job" and method == "POST":
+        body = request.json()
+        return handle_add_job(body)
+    elif resource == "get_job" and method == "GET":
+        return handle_get_job()
     else:
         return build_response(404, "")
     
@@ -78,11 +64,28 @@ def handle_user(body_data):
     user_id = body_data.get("id") if body_data else None
     user_data = {"id": user_id, "name": "Abe"}
 
-    body_bytes = json.dumps(user_data)
-    return build_response(200, body_bytes)
+    return build_response(200, user_data)
 
-ROUTES = {
-    ("GET", "/"): handle_root,
-    ("GET", "/hello"): handle_hello,
-    ("POST", "/user"): handle_user,
-}
+def handle_add_job(job):
+    print("Calling handle_add_job...")
+    job_id = job.get("job_id")
+    with queue_lock:
+        job_queue.put(job)
+    return build_response(200, f"Job {job_id} added.")
+
+def handle_get_job():
+    print("Calling handle_get_job...")
+    job_id = None
+    with queue_lock:
+        if job_queue.empty():
+            print("No job available.")
+            return build_response(200, "No job")
+        job_id = job_queue.get()
+        return build_response(200, job_id)
+        
+
+# ROUTES = {
+#     ("GET", "/"): handle_root,
+#     ("GET", "/hello"): handle_hello,
+#     ("POST", "/user"): handle_user,
+# }

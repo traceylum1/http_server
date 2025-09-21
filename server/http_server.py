@@ -1,6 +1,6 @@
 import socket
 from utility import parse_http_request
-from routes import ROUTES, handle_request
+from routes import handle_request
 from request import Request
 import threading
 

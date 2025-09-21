@@ -1,11 +1,10 @@
 import socket
-from http_requests import post_user_request, get_root_request, get_hello_request
 
-def handle_conn(client_socket, handle_request):
+def handle_conn(client_socket, handle_send_request):
     print("Sending request...")
     with client_socket:
         try:
-            handle_request(client_socket)
+            handle_send_request(client_socket)
             buffer = ""
             while True:
                 data = client_socket.recv(1024).decode("utf-8")
