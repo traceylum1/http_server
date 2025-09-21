@@ -1,10 +1,11 @@
 import socket
 
-def handle_conn(client_socket, handle_send_request):
+def handle_conn(client_socket, client_type, create_request):
     print("Sending request...")
     with client_socket:
         try:
-            handle_send_request(client_socket)
+            http_request = create_request()
+            client_socket.sendall(http_request)
             buffer = ""
             while True:
                 data = client_socket.recv(1024).decode("utf-8")
@@ -15,6 +16,9 @@ def handle_conn(client_socket, handle_send_request):
                 if "\r\n\r\n" in buffer:
                     print("Full header received")
                     print(buffer)
+                
+            if client_type == "consumer":
+                
 
         except Exception as e:
             print(f"Error sending request: {e}")

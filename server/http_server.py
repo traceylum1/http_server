@@ -42,19 +42,6 @@ def handle_client(client_socket, address):
                     request = Request(method, path, headers, body)
                     response = handle_request(request)
 
-                    
-
-                    # if handler:
-                    #     response = handler(request)
-                    # else:
-                    #     response = (
-                    #         "HTTP/1.1 404 Not Found\r\n"
-                    #         "Content-Length: 9\r\n"
-                    #         "Content-Type: text/plain\r\n"
-                    #         "\r\n"
-                    #         "Not Found"
-                    #     ).encode("utf-8")
-
                     client_socket.sendall(response)
 
                 except Exception as e:
