@@ -1,7 +1,7 @@
-import socket
-from requests.request_builder import request_builder
+from .request_builder import request_builder
 import uuid
 import json
+from ..classes.job_class import Job
 
 def post_user_request():
     print("Calling post_user_request...")
@@ -18,13 +18,18 @@ def get_hello_request():
     return request_builder("GET", "/hello")
 
 def post_add_job():
-    print("Calling get_add_job...")
+    print("Calling post_add_job...")
     job_id = str(uuid.uuid4())[:8]
-    jobObj = {
-        "job_id": job_id,
-        "job": "Hello"
+    job_content = "Hello"
+
+    payload = {
+        "id": job_id,
+        "job": job_content,
     }
-    return request_builder("POST", "/add_job", json.dumps(jobObj))
+
+    job = Job(payload)
+    job_dict = job.to_dict()
+    return request_builder("POST", "/add_job", json.dumps(job_dict))
 
 def get_get_job():
     print("Calling get_get_job...")

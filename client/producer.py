@@ -1,5 +1,5 @@
-from client import run_client, handle_conn
-from requests.http_requests import *
+from .client import run_client, handle_conn
+from .requests.http_requests import *
 
 
 def run_producer():

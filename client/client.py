@@ -18,7 +18,8 @@ def handle_conn(client_socket, client_type, create_request):
                     print(buffer)
                 
             if client_type == "consumer":
-                
+                # Call job handler
+                pass
 
         except Exception as e:
             print(f"Error sending request: {e}")

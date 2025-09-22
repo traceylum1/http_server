@@ -1,6 +1,5 @@
-from client import run_client, handle_conn
-from requests.http_requests import post_user_request, get_root_request, get_hello_request, get_get_job
-
+from .client import run_client, handle_conn
+from .requests.http_requests import *
 
 def run_consumer():
     client_socket = run_client()

@@ -1,7 +1,7 @@
 import socket
-from utility import parse_http_request
-from routes import handle_request
-from request import Request
+from .utility import parse_http_request
+from .routes import handle_request
+from .classes.request_class import Request
 import threading
 
 def handle_client(client_socket, address):
