@@ -2,7 +2,6 @@
 from queue import Queue
 from threading import Lock
 from .response_builder import response_builder
-from client.classes.job_class import Job
 
 max_size = 100
 job_queue = Queue(max_size)
@@ -10,14 +9,13 @@ results = {}
 queue_lock = Lock()
 
 
-def handle_add_job(job: Job):
+def handle_add_job(job):
     print("Calling handle_add_job...")
-    print("job", job)
     payload = job["payload"]
     job_id = payload["id"]
     with queue_lock:
-        job_queue.put(payload)
-    return response_builder(200, f"Job {job_id} added.")
+        job_queue.put(job)
+    return response_builder(200, f"Job {job_id} added.", "text")
 
 def handle_get_job():
     print("Calling handle_get_job...")
@@ -25,13 +23,13 @@ def handle_get_job():
     with queue_lock:
         if job_queue.empty():
             print("No job available.")
-            return response_builder(200, "No job")
+            return response_builder(200, "No job", "text")
         job = job_queue.get()
-        return response_builder(200, job)
+        return response_builder(200, job, "json")
         
 def handle_error():
     print("Calling handle_error...")
-    return response_builder(404, "Not Found")
+    return response_builder(404, "Not Found", "text")
 
 
 

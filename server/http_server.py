@@ -34,7 +34,6 @@ def handle_client(client_socket, address):
                             print("Connection closed unexpectedly")
                             break
                         body += body_data
-                    print("Body: ", body)
 
                 # Send response back to client
                 try:

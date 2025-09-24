@@ -1,4 +1,6 @@
 import socket
+from .job_handler import job_handler
+from .utility import parse_http_response
 
 def handle_conn(client_socket, client_type, create_request):
     print("Sending request...")
@@ -17,9 +19,31 @@ def handle_conn(client_socket, client_type, create_request):
                     print("Full header received")
                     print(buffer)
                 
-            if client_type == "consumer":
-                # Call job handler
-                pass
+                    if client_type == "consumer":
+                        header_part, body_part = buffer.split("\r\n\r\n")
+                        version, status_code, status_msg, headers = parse_http_response(header_part)
+                        if status_code != "200":
+                            print(f"Response returned: {status_code} {status_msg}")
+                            break
+
+                        body = body_part
+                        content_length = int(headers.get("Content-Length", 0))
+
+                        while len(body) < content_length:
+                            body_data = client_socket.recv(1024).decode("utf-8")
+                            if not data:
+                                print("Connection closed unexpectedly")
+                                break
+                            body += body_data
+                        if body == "No job":
+                            print("Nothing to process.")
+                            return
+                        else:
+                            try:
+                                # Call job handler
+                                job_handler(body)
+                            except Exception as e:
+                                print(f"Error processing job: {e}")
 
         except Exception as e:
             print(f"Error sending request: {e}")
