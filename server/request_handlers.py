@@ -1,35 +1,31 @@
-
-from queue import Queue
-from threading import Lock
 from .response_builder import response_builder
-
-max_size = 100
-job_queue = Queue(max_size)
-results = {}
-queue_lock = Lock()
-
+from .job_queue import enqueue_job, dequeue_job
 
 def handle_add_job(job):
     print("Calling handle_add_job...")
     payload = job["payload"]
     job_id = payload["id"]
-    with queue_lock:
-        job_queue.put(job)
-    return response_builder(200, f"Job {job_id} added.", "text")
+    try:
+        enqueue_job(job)
+    except Exception as e:
+        print(f"Error: {e}")
+        return response_builder(500, f"{e} Job ID: {job_id}")
+    return response_builder(200, f"Job {job_id} added.")
 
 def handle_get_job():
     print("Calling handle_get_job...")
     job = None
-    with queue_lock:
-        if job_queue.empty():
-            print("No job available.")
-            return response_builder(200, "No job", "text")
-        job = job_queue.get()
-        return response_builder(200, job, "json")
+    try:
+        job = dequeue_job()
+        if job == None:
+            return response_builder(200, "No job")
+        return response_builder(200, job)
+    except Exception as e:
+        print(f"Error: {e}")
         
 def handle_error():
     print("Calling handle_error...")
-    return response_builder(404, "Not Found", "text")
+    return response_builder(404, "Not Found")
 
 
 

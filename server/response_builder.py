@@ -1,17 +1,18 @@
 import json
 
-def response_builder(status_code: int, body: str, content: str):
+def response_builder(status_code: int, body: str):
     reason_phrases = {
         200: "OK",
         201: "Created",
         400: "Bad Request",
         404: "Not Found",
         405: "Method Not Allowed",
+        500: "Internal Server Error"
     }
     reason = reason_phrases.get(status_code, "Unknown")
-    content_type = "application/json" if content == "json" else "text/plain"
+    content_type = "text/plain" if isinstance(body, str) else "application/json"
+    body_bytes = json.dumps(body).encode("utf-8") if content_type == "application/json" else body.encode("utf-8")
 
-    body_bytes = json.dumps(body).encode("utf-8") if content == "json" else body.encode("utf-8")
     return (
         f"HTTP/1.1 {status_code} {reason}\r\n"
         f"Content-Length: {len(body_bytes)}\r\n"
