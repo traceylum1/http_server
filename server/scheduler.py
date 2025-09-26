@@ -1,14 +1,17 @@
-import threading, time, heapq
+import time, heapq
 from datetime import datetime, timedelta
+from .classes.job_class import Job
 
 class Scheduler:
     def __init__(self, queue):
         self.queue = queue
-        self.jobs = []  # min-heap: (next_run_time, interval_seconds, job_fn)
+        self.jobs = []  # min-heap: (next_run_time, interval_seconds, job content)
 
     def add_job(self, interval_seconds, job):
+        job_obj = Job(job)
+        job_dict = job_obj.to_dict()
         next_run = datetime.now() + timedelta(seconds=interval_seconds)
-        heapq.heappush(self.jobs, (next_run, interval_seconds, job))
+        heapq.heappush(self.jobs, (next_run, interval_seconds, job_dict))
 
     def run(self):
         while True:

@@ -7,7 +7,7 @@ job_queue = Queue(max_size)
 results = {}
 queue_lock = threading.Lock()
 
-job = {"payload": {"id": "scheduled_job", "job": "Hello"}, "attempts": 0, "max_attempts": 5, "next_run_at": 1758749688.511364}
+job = {"id": "scheduled_job", "job": "Hello"}
 scheduler = Scheduler(job_queue)
 scheduler.add_job(10, job)
 thread = threading.Thread(target=scheduler.run)

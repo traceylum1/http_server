@@ -3,9 +3,13 @@ from .utility import parse_http_request
 from .routes import handle_request
 from .classes.request_class import Request
 import threading
+from .classes.token_bucket import Token_Bucket
 
-def handle_client(client_socket, address):
+def handle_client(client_socket, address, token_bucket):
     with client_socket:
+        if token_bucket.use_token() == False:
+            print("Please wait a moment and try making a request again.")
+            return
         # Receive all data from client, store in buffer
         buffer = ""
         while True:
@@ -58,6 +62,9 @@ def run_server():
 
         server_socket.bind((host, port))
         server_socket.listen(5)
+        token_bucket = Token_Bucket(1, 1)
+        token_bucket_thread = threading.Thread(target=token_bucket.run, daemon=True)
+        token_bucket_thread.start()
 
         while True:
             print("Server listening on localhost port 8000")
@@ -66,7 +73,7 @@ def run_server():
                 client_socket, address = server_socket.accept()
                 print("Opened client socket")
                 # Spawn a new thread for each client
-                thread = threading.Thread(target=handle_client, args=(client_socket, address))
+                thread = threading.Thread(target=handle_client, args=(client_socket, address, token_bucket))
                 thread.daemon = True  # optional: don’t block exit
                 thread.start()
 
