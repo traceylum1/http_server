@@ -2,58 +2,48 @@
 Token bucket class:
     - Holds a certain number of tokens at any given time
     - Tokens refill at a given pace (tokens per second)
-    - A
 """
 
 import time
+from threading import Lock
 
-class Token_Bucket:
-    def __init__(self, capacity, pace):
+class TokenBucket:
+    def __init__(self, capacity: int, refill_rate: int):
+        """
+        :param capacity: max number of tokens in the bucket
+        :param refill_rate: tokens added per second
+        """
         self.capacity = capacity
-        self.pace_to_add = pace     # tokens/second
         self.tokens = capacity
+        self.refill_rate = refill_rate
         self.last_added = time.time()
+        self.lock = Lock()
     
     """
-        add_tokens checks if capacity is full, if not, adds however many tokens as needed since last time added
-        time_elapsed = now - last_added
-        tokens_to_add = time_elapsed * pace_to_add
+        refill_tokens adds however many tokens as needed since last time added
     """
-    def add_tokens(self):
-        print("Calling add_tokens...")
-        if self.tokens < self.capacity:
-            time_elapsed = int(time.time() - self.last_added)
-            tokens_to_add = self.pace_to_add * time_elapsed
+    def refill_tokens(self):
+        print("Calling refill_tokens...")
+        now = time.time()
+        time_elapsed = int(now - self.last_added)
+        tokens_to_add = self.refill_rate * time_elapsed
+        if tokens_to_add > 0:
             prelim_token_count = self.tokens + tokens_to_add
-            tokens_over_capacity = prelim_token_count - self.capacity
-            if tokens_over_capacity > 0:
-                tokens_to_add -= tokens_over_capacity
-            print(f"Adding {tokens_to_add} tokens")
-            self.tokens += tokens_to_add
-            
-            if self.tokens > self.capacity:
-                self.tokens = self.capacity
+            self.tokens = min(prelim_token_count, self.capacity)
             print("Current number of tokens: ", self.tokens)
-            self.last_added = time.time()
+            self.last_added = now
 
     """
-        use_token removes one token from token bucket per request received if available
+        use_token calls refill_tokens and removes one token from token bucket per request received if available
         returns True if token available, False otherwise
     """
-    def use_token(self):
+    def use_token(self) -> bool:
         print("Calling use_token...")
-        if self.tokens == 0:
-            print("No tokens available, please wait and try again")
+        with self.lock:
+            self.refill_tokens()
+            if self.tokens >= 1:
+                print("Using a token")
+                self.tokens -= 1
+                return True
+            print("No tokens available")
             return False
-        else:
-            print("Using a token")
-            self.tokens -= 1
-            return True
-
-    """
-        run the token_bucket, calling add_tokens in an infinite loop
-    """
-    def run(self):
-        while True:
-            self.add_tokens()
-            time.sleep(5)

@@ -3,13 +3,14 @@ from .utility import parse_http_request
 from .routes import handle_request
 from .classes.request_class import Request
 import threading
-from .classes.token_bucket import Token_Bucket
+from .classes.token_bucket import TokenBucket
+from .response_builder import response_builder
 
-def handle_client(client_socket, address, token_bucket):
+def handle_client(client_socket: socket, address, token_bucket: TokenBucket):
     with client_socket:
         if token_bucket.use_token() == False:
             print("Please wait a moment and try making a request again.")
-            return
+            return response_builder(429, "Too Many Requests")
         # Receive all data from client, store in buffer
         buffer = ""
         while True:
@@ -62,9 +63,7 @@ def run_server():
 
         server_socket.bind((host, port))
         server_socket.listen(5)
-        token_bucket = Token_Bucket(1, 1)
-        token_bucket_thread = threading.Thread(target=token_bucket.run, daemon=True)
-        token_bucket_thread.start()
+        token_bucket = TokenBucket(1, 1)
 
         while True:
             print("Server listening on localhost port 8000")

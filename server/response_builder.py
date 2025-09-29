@@ -7,6 +7,7 @@ def response_builder(status_code: int, body: str):
         400: "Bad Request",
         404: "Not Found",
         405: "Method Not Allowed",
+        429: "Too Many Requests",
         500: "Internal Server Error"
     }
     reason = reason_phrases.get(status_code, "Unknown")
