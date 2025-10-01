@@ -6,11 +6,8 @@ import threading
 from .classes.token_bucket import TokenBucket
 from .response_builder import response_builder
 
-def handle_client(client_socket: socket, address, token_bucket: TokenBucket):
+def handle_client(client_socket: socket, address, limiter: TokenBucket):
     with client_socket:
-        if token_bucket.use_token() == False:
-            print("Please wait a moment and try making a request again.")
-            return response_builder(429, "Too Many Requests")
         # Receive all data from client, store in buffer
         buffer = ""
         while True:
@@ -26,6 +23,11 @@ def handle_client(client_socket: socket, address, token_bucket: TokenBucket):
                 print(buffer)
                 header_part, body_part = buffer.split("\r\n\r\n")
                 method, path, version, headers = parse_http_request(header_part)
+
+                # Reading headers before using rate limiter allows for more control
+                # Avoids wasting resources reading body if not necessary
+                if limiter.use_token() == False:
+                    return response_builder(429, "Too Many Requests")
 
                 # If POST or PUT request, make sure full body received
                 body = body_part
@@ -63,7 +65,7 @@ def run_server():
 
         server_socket.bind((host, port))
         server_socket.listen(5)
-        token_bucket = TokenBucket(1, 1)
+        limiter = TokenBucket(1, 1)
 
         while True:
             print("Server listening on localhost port 8000")
@@ -72,7 +74,7 @@ def run_server():
                 client_socket, address = server_socket.accept()
                 print("Opened client socket")
                 # Spawn a new thread for each client
-                thread = threading.Thread(target=handle_client, args=(client_socket, address, token_bucket))
+                thread = threading.Thread(target=handle_client, args=(client_socket, address, limiter))
                 thread.daemon = True  # optional: don’t block exit
                 thread.start()
 
