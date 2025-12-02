@@ -45,3 +45,4 @@ def job_handler(job):
                 print(f"Job {job_id} failed ({e}), retrying in {delay:.2f}s...")
             else:
                 print(f"Job {job_id} permanently failed after {job_dict['attempts']} attempts")
+                break

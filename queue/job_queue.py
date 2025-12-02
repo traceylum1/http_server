@@ -1,6 +1,6 @@
 from queue import Queue
 import threading
-from .scheduler import Scheduler
+from ..scheduler.scheduler import Scheduler
 
 max_size = 100
 job_queue = Queue(max_size)

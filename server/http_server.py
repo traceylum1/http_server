@@ -54,7 +54,7 @@ def handle_client(client_socket: socket, address, limiter: TokenBucket):
                     print(f"Error sending response: {e}")
                 
                 finally:
-                    print("Finished handling client.")
+                    print("Finished handling client request.")
                     break
 
 

@@ -7,7 +7,7 @@ job payload = {
 """
 
 class Job:
-    def __init__(self, payload, max_attempts=5):
+    def __init__(self, payload, max_attempts=3):
         self.payload = payload
         self.attempts = 0
         self.max_attempts = max_attempts
