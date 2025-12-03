@@ -1,6 +1,6 @@
 import time, heapq
 from datetime import datetime, timedelta
-from ..server.classes.job_class import Job
+from .classes.job_class import Job
 
 class Scheduler:
     def __init__(self, queue):

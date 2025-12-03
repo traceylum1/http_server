@@ -1,6 +1,7 @@
 from queue import Queue
+from .scheduler import Scheduler
 import threading
-from ..scheduler.scheduler import Scheduler
+
 
 max_size = 100
 job_queue = Queue(max_size)
@@ -36,3 +37,31 @@ def results_put(job_id):
 
 def results_get():
     pass
+
+
+# import redis
+
+# def run_queue():
+#     r = redis.Redis(host='localhost', port=6379, decode_responses=True)
+
+#     r.set('foo', 'bar')
+#     # True
+#     r.get('foo')
+#     # bar
+
+#     r.hset('user-session:123', mapping={
+#         'name': 'John',
+#         "surname": 'Smith',
+#         "company": 'Redis',
+#         "age": 29
+#     })
+#     # True
+
+#     r.hgetall('user-session:123')
+#     # {'surname': 'Smith', 'name': 'John', 'company': 'Redis', 'age': '29'}
+
+#     r.close()
+
+
+# if __name__ == "__main__":
+#     run_queue()

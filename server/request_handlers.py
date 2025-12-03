@@ -1,5 +1,5 @@
 from .response_builder import response_builder
-from ..queue.job_queue import enqueue_job, dequeue_job
+from .job_queue import enqueue_job, dequeue_job
 
 def handle_add_job(job):
     print("Calling handle_add_job...")
