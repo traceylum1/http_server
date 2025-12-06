@@ -1,34 +1,36 @@
-from queue import Queue
+# from queue import Queue
 from .scheduler import Scheduler
 import threading
+import redis
+import json
 
-
+r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 max_size = 100
-job_queue = Queue(max_size)
-results = {}
 queue_lock = threading.Lock()
 
-job = {"id": "scheduled_job", "job": "Hello"}
-scheduler = Scheduler(job_queue)
-scheduler.add_job(10, job)
-thread = threading.Thread(target=scheduler.run)
-thread.daemon = True  # optional: don’t block exit
-thread.start()
+# job = {"id": "scheduled_job", "job": "Hello"}
+# scheduler = Scheduler(r)
+# scheduler.add_job(10, job)
+# thread = threading.Thread(target=scheduler.run)
+# thread.daemon = True  # optional: don’t block exit
+# thread.start()
 
 def enqueue_job(job):
     with queue_lock:
         try:
-            job_queue.put(job)
-        except:
-            raise Exception("Failed to add job to queue.")
+            r.lpush("queue:jobs", json.dumps(job))
+        except Exception as e:
+            print(f"Failed to add job to queue.", e)
+            raise e
 
 def dequeue_job():
     with queue_lock:
         try:
-            if job_queue.empty():
+            job = json.loads(r.lpop("queue:jobs"))
+            if not job:
                 print("No job available.")
                 return None
-            return job_queue.get()
+            return job
         except:
             raise Exception("Failed to get job from queue.")
 
@@ -38,30 +40,3 @@ def results_put(job_id):
 def results_get():
     pass
 
-
-# import redis
-
-# def run_queue():
-#     r = redis.Redis(host='localhost', port=6379, decode_responses=True)
-
-#     r.set('foo', 'bar')
-#     # True
-#     r.get('foo')
-#     # bar
-
-#     r.hset('user-session:123', mapping={
-#         'name': 'John',
-#         "surname": 'Smith',
-#         "company": 'Redis',
-#         "age": 29
-#     })
-#     # True
-
-#     r.hgetall('user-session:123')
-#     # {'surname': 'Smith', 'name': 'John', 'company': 'Redis', 'age': '29'}
-
-#     r.close()
-
-
-# if __name__ == "__main__":
-#     run_queue()

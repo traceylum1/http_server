@@ -83,4 +83,21 @@ def run_server():
                 break
 
 if __name__ == "__main__":
+    import signal
+    import sys
+    from .job_queue import r   # whatever file holds it
+
+    def shutdown_handler(signum, frame):
+        print("Shutting down HTTP server...")
+
+        # Close Redis
+        r.close()
+        print("Closed Redis connection.")
+
+        # Optionally wait for worker threads to finish
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, shutdown_handler)
+    signal.signal(signal.SIGTERM, shutdown_handler)
+
     run_server()
