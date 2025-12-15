@@ -41,8 +41,10 @@ def handle_conn(client_socket, client_type, create_request):
                         else:
                             try:
                                 # Call job handler
-                                job_handler(body)
+                                res = job_handler(body)
+                                # TODO: Consumer informs queue server that job was successfully handled
                             except Exception as e:
+                                # TODO: Consumer informs queue server that job handling failed
                                 print(f"Error processing job: {e}")
 
         except Exception as e:

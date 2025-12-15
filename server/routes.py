@@ -13,6 +13,10 @@ def handle_request(request: Request):
         return handle_add_job(job)
     elif resource == "get_job" and method == "GET":
         return handle_get_job()
+    elif resource == "ack_job" and method == "POST":
+        return handle_ack_job()
+    elif resource == "fail_job" and method == "POST":
+        return handle_fail_job()
     else:
         return handle_error()
 

@@ -26,13 +26,28 @@ def enqueue_job(job):
 def dequeue_job():
     with queue_lock:
         try:
-            job = json.loads(r.lpop("queue:jobs"))
-            if not job:
+            job_json = r.brpoplpush("queue:jobs", "queue:processing", timeout=5)
+            if not job_json:
                 print("No job available.")
                 return None
-            return job
-        except:
-            raise Exception("Failed to get job from queue.")
+            return json.loads(job_json)
+        except Exception as e:
+            print("Failed to get job from queue.", e)
+            raise e
+
+def ack_job(job):
+    r.lrem("queue:processing", 1, json.dumps(job))
+
+def fail_job(job):
+    job["attempts"] += 1
+
+    r.lrem("queue:processing", 1, json.dumps(job))
+
+    if job["attempts"] >= job["max_attempts"]:
+        r.lpush("queue:dead", json.dumps(job))
+    else:
+        r.lpush("queue:jobs", json.dumps(job))
+
 
 def results_put(job_id):
     pass

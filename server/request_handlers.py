@@ -23,6 +23,13 @@ def handle_get_job():
     except Exception as e:
         print(f"Error: {e}")
         
+def handle_ack_job():
+    pass
+
+def handle_fail_job():
+    pass
+
+
 def handle_error():
     print("Calling handle_error...")
     return response_builder(404, "Not Found")

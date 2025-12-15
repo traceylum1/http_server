@@ -31,6 +31,6 @@ def post_add_job():
     job_dict = job.to_dict()
     return request_builder("POST", "/add_job", json.dumps(job_dict))
 
-def get_get_job():
-    print("Calling get_get_job...")
-    return request_builder("GET", "/get_job")
+def get_consume_job():
+    print("Calling get_consume_job...")
+    return request_builder("GET", "/consume_job")

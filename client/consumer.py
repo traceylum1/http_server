@@ -3,7 +3,7 @@ from .requests.http_requests import *
 
 def run_consumer():
     client_socket = run_client()
-    handle_conn(client_socket, "consumer", get_get_job)
+    handle_conn(client_socket, "consumer", get_consume_job)
 
 
 if __name__ == "__main__":
