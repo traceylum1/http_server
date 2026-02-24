@@ -33,4 +33,4 @@ def post_add_job():
 
 def get_consume_job():
     print("Calling get_consume_job...")
-    return request_builder("GET", "/consume_job")
+    return request_builder("GET", "/get_job")

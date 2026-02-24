@@ -26,7 +26,7 @@ def enqueue_job(job):
 def dequeue_job():
     with queue_lock:
         try:
-            job_json = r.brpoplpush("queue:jobs", "queue:processing", timeout=5)
+            job_json = r.brpoplpush("queue:jobs", "queue:processing", timeout=1)
             if not job_json:
                 print("No job available.")
                 return None

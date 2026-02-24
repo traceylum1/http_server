@@ -15,7 +15,7 @@ def backoff_delay_jitter(attempt, base=1, cap=30):
     return delay + jitter
 
 # Backoff calculation for re-enqueue
-def backoff_re_enqueue(attempts, base=2, cap=300):
+def backoff_re_enqueue(attempts, base=2, cap=30):
     return min(cap, base ** attempts)
 
 # Example "work" function
@@ -48,7 +48,6 @@ def job_handler(job):
 
         else:
             print(f"Job {job_id} permanently failed after {job_dict['attempts']} attempts")
-            break
 
 
 def job_handler_consecutive_retry(job):

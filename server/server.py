@@ -65,10 +65,12 @@ def run_server():
 
         server_socket.bind((host, port))
         server_socket.listen(5)
+        print("Server listening on localhost port 8000")
+
         limiter = TokenBucket(1, 1)
 
         while True:
-            print("Server listening on localhost port 8000")
+            
             # Wait for client to connect to socket
             try:
                 client_socket, address = server_socket.accept()
