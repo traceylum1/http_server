@@ -51,31 +51,41 @@ This prevents job loss if a consumer crashes mid-processing.
 
 ## Getting Started
 
-### 1. Run Redis
+### 1. Run Local Redis Open Source Instance
 
-Using Docker:
+After installing Redis, run executable from command line:
 
-docker run -p 6379:6379 redis
+`redis-server`
+
+Redis will be running in the foreground.
 
 ---
 
-### 2. Start a Consumer
+### 2. Start Job Queue Server
+
+Run the job queue server:
+
+`python3 -m server.server`
+
+---
+
+### 3. Start a Consumer
 
 Run a single consumer:
 
-python3 -m client.consumer
+`python3 -m client.consumer`
 
 Run multiple consumers to test concurrency:
 
-python3 -m client.consumer & python3 -m client.consumer &
+`python3 -m client.consumer & python3 -m client.consumer &`
 
 ---
 
-### 3. Enqueue a Job
+### 4. Enqueue a Job
 
 Run a producer:
 
-python3 -m client/producer
+`python3 -m client.producer`
 
 ---
 
