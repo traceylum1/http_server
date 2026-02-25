@@ -1,12 +1,14 @@
 import socket
 from .utility import parse_http_request
-from .routes import handle_request
+from .router import router
 from .classes.request_class import Request
 import threading
 from .classes.token_bucket import TokenBucket
 from .response_builder import response_builder
+from .job_queue import JobQueue
+from .scheduler import Scheduler
 
-def handle_client(client_socket: socket, address, limiter: TokenBucket):
+def handle_client(client_socket: socket, address, job_queue: JobQueue, limiter: TokenBucket):
     with client_socket:
         # Receive all data from client, store in buffer
         buffer = ""
@@ -48,7 +50,7 @@ def handle_client(client_socket: socket, address, limiter: TokenBucket):
                 try:
                     # handler = ROUTES.get((method, path))
                     request = Request(method, path, headers, body)
-                    response = handle_request(request)
+                    response = router(request, job_queue)
 
                     client_socket.sendall(response)
 
@@ -69,16 +71,25 @@ def run_server():
         server_socket.listen(5)
         print("Server listening on localhost port 8000")
 
+        job_queue = JobQueue()
+        scheduler = Scheduler(job_queue)
         limiter = TokenBucket(1, 1)
+
+        job = {"id": "scheduled_job", "job": "Hello"}
+        scheduler.add_job(5, job)
+        thread = threading.Thread(target=scheduler.run)
+        thread.daemon = True  # optional: don’t block exit
+        thread.start()
 
         while True:
             
             # Wait for client to connect to socket
             try:
                 client_socket, address = server_socket.accept()
+                print(address)
                 print("Opened client socket")
                 # Spawn a new thread for each client
-                thread = threading.Thread(target=handle_client, args=(client_socket, address, limiter))
+                thread = threading.Thread(target=handle_client, args=(client_socket, address, job_queue, limiter))
                 thread.daemon = True  # optional: don’t block exit
                 thread.start()
 
@@ -89,14 +100,14 @@ def run_server():
 if __name__ == "__main__":
     import signal
     import sys
-    from .job_queue import r   # whatever file holds it
+    # from .job_queue import r   # whatever file holds it
 
     def shutdown_handler(signum, frame):
         print("Shutting down HTTP server...")
 
         # Close Redis
-        r.close()
-        print("Closed Redis connection.")
+        # r.close()
+        # print("Closed Redis connection.")
 
         # Optionally wait for worker threads to finish
         sys.exit(0)
