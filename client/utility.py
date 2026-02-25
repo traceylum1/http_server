@@ -1,7 +1,7 @@
 def parse_http_response(request_data: str):
     lines = request_data.split("\r\n")
     request_line = lines[0]
-    version, status_code, status_msg = request_line.split(" ")
+    version, status_code, status_msg = request_line.split(" ", 2)
 
     headers = {}
     for line in lines[1:]:

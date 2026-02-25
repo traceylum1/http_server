@@ -20,8 +20,13 @@ def handle_conn(client_socket, client_type, create_request):
                     print(buffer)
                 
                     if client_type == "consumer":
-                        header_part, body_part = buffer.split("\r\n\r\n")
-                        version, status_code, status_msg, headers = parse_http_response(header_part)
+                        try:
+                            header_part, body_part = buffer.split("\r\n\r\n")
+                            version, status_code, status_msg, headers = parse_http_response(header_part)
+                        except Exception as e:
+                            print(f"Error parsing response: {e}")
+                            break
+
                         if status_code != "200":
                             print(f"Response returned: {status_code} {status_msg}")
                             break
@@ -31,7 +36,7 @@ def handle_conn(client_socket, client_type, create_request):
 
                         while len(body) < content_length:
                             body_data = client_socket.recv(1024).decode("utf-8")
-                            if not data:
+                            if not body_data:
                                 print("Connection closed unexpectedly")
                                 break
                             body += body_data

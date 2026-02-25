@@ -27,7 +27,9 @@ def handle_client(client_socket: socket, address, limiter: TokenBucket):
                 # Reading headers before using rate limiter allows for more control
                 # Avoids wasting resources reading body if not necessary
                 if limiter.use_token() == False:
-                    return response_builder(429, "Too Many Requests")
+                    response = response_builder(429, "Too Many Requests")
+                    client_socket.sendall(response)
+                    break
 
                 # If POST or PUT request, make sure full body received
                 body = body_part
